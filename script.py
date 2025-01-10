@@ -35,8 +35,10 @@ for cam in cameras:
     print(f"Index: {cam['index']}, Name: {cam['name']}")
 
 
+# Config:
 CAMERA_INDEX = 0
 INTERVAL_IN_MILLISECONDS = 5000
+DISPLAY_IMAGES = True
 
 
 
@@ -79,7 +81,8 @@ try:
         count = count + 1
 
         # Display the most recently taken image
-        cv2.imshow("Most Recently Taken Image", frame)
+        if DISPLAY_IMAGES:
+            cv2.imshow("Most Recently Taken Image", frame)
 
         # Wait for 5 seconds or until the user presses 'q'
         if cv2.waitKey(INTERVAL_IN_MILLISECONDS) & 0xFF == ord('q'):
