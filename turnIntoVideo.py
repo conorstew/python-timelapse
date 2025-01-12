@@ -3,36 +3,64 @@ import subprocess
 
 # Directory where your images are stored
 images_folder = "2025-01-11"
-image_directory = f"./timelapses/{images_folder}" 
+image_directory = f"./timelapses/{images_folder}"
 
 # Output video filename
 output_video = f"{image_directory}/videos/output_video.mp4"
 
-# Frame rate (number of images shown per second in the video)
-frame_rate = 1 / 5  # Change to 1/5 for 5-second intervals per image
+# Frame rate (number of images per second in the video).
+# For a 5-second interval per image, frame_rate = 1/5 => 0.2 
+# and ffmpeg's -framerate value should become 5 (1 / 0.2).
+frame_rate = 1 / 5  
 
-def create_video(image_directory, output_video, frame_rate):
-    # Make sure FFmpeg is installed
+def get_unique_filename(directory, filename):
+    """
+    Check if a file exists, and if it does, generate a unique filename by appending a number.
+    """
+    base_name, ext = os.path.splitext(filename)
+    counter = 1
+    unique_filename = filename
+
+    while os.path.exists(os.path.join(directory, unique_filename)):
+        unique_filename = f"{base_name}_{counter}{ext}"
+        counter += 1
+
+    return unique_filename
+
+def create_video(image_directory, frame_rate):
+    # Make sure the output directory exists
+    output_directory = os.path.join(image_directory, "videos")
+    os.makedirs(output_directory, exist_ok=True)
+
+    # Determine unique output filename
+    base_output_filename = "output_video.mp4"
+    output_video = get_unique_filename(output_directory, base_output_filename)
+
+    # Check if FFmpeg is installed
     try:
-        subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["ffmpeg", "-version"], check=True, 
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except FileNotFoundError:
         print("FFmpeg is not installed. Please install FFmpeg and try again.")
         return
-
-    # Run FFmpeg command
+    
+    # Construct the FFmpeg command
+    ffmpeg_command = [
+        "ffmpeg",
+        "-framerate", str(1 / frame_rate),    # e.g., if frame_rate = 0.2, this becomes 5
+        "-pattern_type", "glob",
+        "-i", os.path.join(image_directory, "image_*.jpg"), 
+        "-vf", "format=yuv420p",             # Ensure output uses yuv420p pixel format
+        "-c:v", "libx264",
+        os.path.join(output_directory, output_video)
+    ]
+    
+    # Run FFmpeg
     try:
-        ffmpeg_command = [
-            "ffmpeg",
-            "-framerate", str(1 / frame_rate),
-            "-i", os.path.join(image_directory, "image_%Y%m%d_%H%M%S.jpg"),
-            "-c:v", "libx264",
-            "-pix_fmt", "yuv420p",
-            output_video
-        ]
         subprocess.run(ffmpeg_command, check=True)
-        print(f"Video successfully created: {output_video}")
+        print(f"Video successfully created: {os.path.join(output_directory, output_video)}")
     except subprocess.CalledProcessError as e:
         print(f"Error while creating video: {e}")
 
-# Replace with your actual path and output filename
-create_video(image_directory, output_video, frame_rate)
+# Create the video
+create_video(image_directory, frame_rate)
