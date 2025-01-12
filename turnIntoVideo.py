@@ -8,10 +8,10 @@ image_directory = f"./timelapses/{images_folder}"
 # Output video filename
 output_video = f"{image_directory}/videos/output_video.mp4"
 
-# Frame rate (number of images per second in the video).
-# For a 5-second interval per image, frame_rate = 1/5 => 0.2 
-# and ffmpeg's -framerate value should become 5 (1 / 0.2).
-frame_rate = 1 / 5  
+# Frame rate is how many images to show per second
+images_to_show_per_second = 80
+frame_rate = 1 / images_to_show_per_second
+
 
 def get_unique_filename(directory, filename):
     """
