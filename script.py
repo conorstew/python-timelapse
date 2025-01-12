@@ -7,16 +7,24 @@ import objc
 from Foundation import NSArray
 from AVFoundation import AVCaptureDevice
 
-
 import subprocess
 
+# Global variable to store the caffeinate process
+caffeinate_process = None
 
 def prevent_sleep():
-    """Prevent the Mac from sleeping using the caffeinate command."""
+    """
+    Prevent the Mac from sleeping using the caffeinate command.
+    -d   Prevent the display from sleeping.
+    -i   Prevent idle system sleep.
+    -s   Prevent the system from sleeping.
+    -u   Assert user is active.
+    """
     global caffeinate_process
-    caffeinate_process = subprocess.Popen(["caffeinate", "-s"])
-    print("Sleep prevention enabled.")
+    # Use multiple flags to cover more sleep scenarios.
+    caffeinate_process = subprocess.Popen(["caffeinate", "-d", "-i", "-s", "-u"])
 
+    print("Sleep prevention enabled with -disu.")
 
 def allow_sleep():
     """Allow the Mac to sleep by terminating the caffeinate process."""
@@ -25,7 +33,6 @@ def allow_sleep():
         caffeinate_process.terminate()
         caffeinate_process = None
         print("Sleep prevention disabled.")
-
 
 def list_cameras_with_names():
     available_cameras = []
@@ -52,13 +59,11 @@ def list_cameras_with_names():
         print(f"Index: {cam['index']}, Name: {cam['name']}")
     return available_cameras
 
-
 def main():
     # Prevent the Mac from sleeping
     prevent_sleep()
 
     try:
-
         # Config:
         CAMERA_INDEX = 0
         INTERVAL_IN_MILLISECONDS = 5000
@@ -66,7 +71,7 @@ def main():
 
         # Get the current date to create a folder
         current_date = datetime.now().strftime("%Y-%m-%d")
-        containing_folder = os.path.expanduser("~/Desktop/timelapses")
+        containing_folder = os.path.expanduser("./timelapses")
         output_folder = os.path.join(containing_folder, current_date)
         print(f"Output folder: {output_folder}")
 
@@ -113,9 +118,6 @@ def main():
 
     except KeyboardInterrupt:
         print("Stopped capturing images.")
-
-
-
 
     finally:
         # Release resources
