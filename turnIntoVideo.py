@@ -2,14 +2,11 @@ import os
 import subprocess
 
 # Directory where your images are stored
-images_folder = "2025-01-11"
+images_folder = "2025-01-12"
 image_directory = f"./timelapses/{images_folder}"
 
-# Output video filename
-output_video = f"{image_directory}/videos/output_video.mp4"
-
 # Frame rate is how many images to show per second
-images_to_show_per_second = 80
+images_to_show_per_second = 200
 frame_rate = 1 / images_to_show_per_second
 
 
@@ -33,7 +30,7 @@ def create_video(image_directory, frame_rate):
     os.makedirs(output_directory, exist_ok=True)
 
     # Determine unique output filename
-    base_output_filename = "output_video.mp4"
+    base_output_filename = f"output_video({images_to_show_per_second}fps).mp4"
     output_video = get_unique_filename(output_directory, base_output_filename)
 
     # Check if FFmpeg is installed
