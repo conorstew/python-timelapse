@@ -97,6 +97,9 @@ def main():
                 print("Error: Failed to capture image.")
                 break
 
+            # Rotate the frame by 90 degrees clockwise
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
             # Generate a filename based on the current timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = os.path.join(output_folder, f"image_{timestamp}.jpg")
